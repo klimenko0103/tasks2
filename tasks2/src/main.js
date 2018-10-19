@@ -5,45 +5,43 @@ import SignUp from './sign-up';
 import Edit from './profile';
 import Homes from './homes';
 
-
-export default class Main extends Component
-{
+export default class Main extends Component {
     constructor() {
         super();
-        // console.log(11111111111111111)
         this.state = {
             extraClass1: 'active',
             extraClass2: '',
             extraClass3: 'active',
             extraClass4: '',
-
             isOnline: null,
-            // online: localStorage.getItem('online')||""
+            signUser:null
         }
     }
 
     ActiveForm(str){
         str === 'log' ? this.setState({extraClass1: 'active', extraClass2: ''}) : this.setState({extraClass1: '', extraClass2: 'active'});
+       this.setState({signUser:null})
     }
     ActiveForm2(str){
         str === 'profile' ? this.setState({extraClass3: 'active', extraClass4: ''}) : this.setState({extraClass3: '', extraClass4: 'active'});
     }
 
     changeUser(userOnline) {
-        // console.log(user); //token
         this.setState({isOnline: userOnline});
+    }
+
+    signUser(){
+        this.setState({ signUser: true});
     }
 
     outUser(userOnline){
         localStorage.removeItem('token');
         this.setState({isOnline:!userOnline});
-        // console.log(this.state.isOnline);
         this.setState({extraClass1:'active',extraClass2:'',extraClass3:'active',extraClass4:''})
     }
 
     componentDidMount(){
-        var storageUser = localStorage.getItem('token');
-        // console.log('sjcksd',storageUser);
+        let storageUser = localStorage.getItem('token');
         if (storageUser) {
             try {
                 this.setState({isOnline: storageUser});
@@ -63,16 +61,11 @@ export default class Main extends Component
         var extraClass4 = this.state.extraClass4;
 
         var userOnline = this.state.isOnline;
-
-        console.log('main',userOnline);
-        // console.log(this.state.online);
-        // console.log('TETE',user);
-
+        var userSign = this.state.signUser;
 
         return (
-            <div className="f">
                 <Router>
-                    <div >
+                    <div id="registration" >
                         <div className="forms1">
                             <div >
                                 <ul className="nav nav-tabs nav-justified">
@@ -92,21 +85,24 @@ export default class Main extends Component
                                 <Login onChange={this.changeUser.bind(this)} />
                             )
                         )}/>
+                        <Route exact path="/sign-up" render={() => (
+                            (userSign) ? (
+                                <Redirect to="/"/>
+                            ) : (
+                                <SignUp onChange={this.signUser.bind(this)}/>
+                            )
+                        )}/>
                         <Route exact path='/homes' component={Homes} />
-                        <Route exact path='/sign-up' component={SignUp} />
-                        {/*<Route exact path='/profile' component= {() => <Edit onChange={this.changeUser.bind(this)}/>}/>*/}
-
                         <Route exact path="/profile" render={() => (
                             (userOnline) ? (
                                 <Edit onChange={this.changeUser.bind(this)} />
-                            ) : (
+                        ) : (
                                 <Redirect to="/"/>
                             )
                         )}/>
                     </Switch>
                     </div>
                 </Router>
-            </div>
         )
     }
 }

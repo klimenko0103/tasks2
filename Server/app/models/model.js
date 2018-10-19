@@ -12,11 +12,8 @@ var userSchema = new mongoose.Schema({
 });
 
 
-userSchema.methods.encryptPass = function(){
-    // this -> user object
-    // console.log('passhash', this.password);
-    var pass = crypto.createHash('md5').update(this.password, 10).digest('hex');
-    // console.log('hash', pass);
+userSchema.methods.encryptPass = function(password){
+    var pass = crypto.createHash('md5').update(password).digest('hex');
     return this.password = pass;
 };
 

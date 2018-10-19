@@ -1,21 +1,66 @@
+html {
+  height: 100%;
+  /*overflow: auto;*/
+}
 body {
+  background-color: #bee4ee;
+  height: 100%;
+}
+
+#app {
   padding:20px;
-  background: #175690;
+  background: #175692;
   margin: auto;
   display: block;
-  width: 450px;
+  height: 100%;
+}
+
+#registration {
+  max-width: 450px;
+  margin: auto;
+}
+#loader-identity {
+  display: inline-block;
+  /*position: fixed;*/
+  /*left: 100px;*/
+  /*top: 200px;*/
+  /*margin: 0 auto;*/
+  width: 33px;
+  height: 33px;
+  z-index: 9999;
+  background: url('./loader.gif') no-repeat;
+}
+.noEdit{
+  pointer-events:none;
+}
+
+#buttonForm{
+  height: 50px;
+}
+#buttonForm2{
+    height: 50px;
+}
+
+.modal-body {
+  overflow: hidden;
+}
+
+h1{
+  margin-top: -8px;
+}
+
+#edit{
+  /*pointer-events:none;*/
 }
 
 .forms {
   background: #ffffff;
   margin: 0;
 }
-
 .forms form { padding: 30px; }
 
 .forms1 {
   background: #fff;
-
   margin: 0;
   font-size: 180%;
 }
@@ -30,7 +75,6 @@ body {
 /*}*/
 .form-check-input  + label{
   padding: 10px;
-
 }
 .form-check-input{
   display: none;
@@ -42,9 +86,13 @@ body {
   border-radius: 18px;
   min-width: 100px;
 }
-
+.nav-tabs.nav-justified>li>a{
+    height: 59px;
+}
 .nav-tabs.nav-justified>.active>a,
 .nav-tabs.nav-justified>.active>a:hover,
 .nav-tabs.nav-justified>.active>a:focus{
   background-color: #BEE4EE;
+    max-height: 59px;
+    border-bottom: 1px solid #ddd;
 }

@@ -3,6 +3,7 @@ var crypto = require('crypto');
 var config = require('../routes/config');
 var jwt = require('jwt-simple');
 
+
 /**
  * SIGN UP new user
  * При поступлении запроса типа POST эта функция шифрует пароль
@@ -20,16 +21,11 @@ module.exports.post = function (req, res) {
         login : params.login,
         password : params.password,
     });
-    // console.log('userpass',user.username);
     user.encryptPass(user.password);
-    // console.log('userpass',user.password);
     saveUser(user,res);
-
-    // console.log('savedddddd', user)
 };
 
 function saveUser(model, res) {
-
     model.save(function (err) {
         if (err) {
             res.sendStatus(500)
@@ -37,11 +33,9 @@ function saveUser(model, res) {
         else {
             res.sendStatus(201)
         }
-
     });
-    console.log('save', model)
+    console.log('save server', model)
 }
-
 
 /**
  * SIGN UP token
@@ -55,7 +49,6 @@ function saveUser(model, res) {
  */
 
 module.exports.getUser = function(req, res){
-        // console.log('getlogin',req.auth.login)
    User.findOne({login: req.auth.login}, function(err, user) {
             if (err) {
                 console.log(err);
@@ -79,21 +72,12 @@ module.exports.getUser = function(req, res){
  */
 
 module.exports.postLog = function(req, res) {
-    // let token = '';
     if (!req.body.login || !req.body.password) {
         return res.sendStatus(400)
     } else {
-
         let params = req.body;
-        var userAuth = new User({
-            login : params.login,
-            password : params.password,
-        });
-        // console.log(user.password)
-        // userAuth.encryptPass(userAuth.password)
-        // console.log('posthash',userAuth.password)
-
-        User.findOne({login: userAuth.login})
+        let login = params.login;
+        User.findOne({login: login})
             .select('password')
             .exec(function (err, user) {
                 if (err) {
@@ -102,77 +86,76 @@ module.exports.postLog = function(req, res) {
                 if (!user) {
                     return res.sendStatus(404)
                 }
-                // console.log('bd',user.password)
-                // console.log('body',userAuth.encryptPass(userAuth.password))
-                if (userAuth.encryptPass(userAuth.password)=== user.password){
-                    var token = jwt.encode({login: userAuth.login}, config.secretkey);
+                if (user.password === user.encryptPass(params.password) ){
+                    let token = jwt.encode({login:login}, config.secretkey);
                     return res.send(token);
                 }
                 return res.sendStatus(401)
-
-                })
+            })
     }
-
 };
 
 /**
  * EDIT PROFILE
- */
+*/
 
 module.exports.put = function (req, res) {
-    console.log('body', req.body);
-    // User.update({token : req.body.token}, { age : 25}, {upsert: true})
-    // console.log(req.body._id);
-    User.findOne({_id: req.body._id})
-        .exec(function (err, user) {
-            if (err) {
-                console.log(err);
-                return res.sendStatus(500)
+    User.findOne({login: req.auth.login}, function(err, user) {
+        if (err) {
+            console.log(err);
+            return res.sendStatus(500)
+        }
+            if (!user) {
+                return res.sendStatus(404)
             }
-            else {
-                if (req.body.gender !== '') {
-                    user.gender = req.body.gender;
-                }
-                // console.log('22222', user.gender)
-
-                if (req.body.username !== '') {
-                    user.username = req.body.username;
-                }
-                if (req.body.age !== '') {
-                    user.age = req.body.age;
-                }
-                if (req.body.password !== '') {
-                    // user.encryptPass(req.password);
-                    // console.log('uuuuuuuuuuuuuuuuuuuuuuuuuuuuu',req.body.password);
-                    // console.log(user.encryptPass(user.password))
-                    // console.log(user.encryptPass(req.body.password));
-                    user.password = crypto.createHash('md5').update(req.body.password, 10).digest('hex');
-                }
-
-
-                user.save(function () {
+        else {
+            User.findOne({_id: req.body._id})
+                .exec(function (err, user) {
                     if (err) {
-                        res.sendStatus(500)
+                        console.log(err);
+                        return res.sendStatus(500)
                     }
                     else {
-                        res.sendStatus(201)
-                        console.log('save', user)
-                        // res.json(user)
-                        // console.log('save', req.body)
-                        // console.log('eeeeeeeeeeeeeeeeeeeeeeeeee', user.username);
+                        if (req.body.gender !== '') {
+                            user.gender = req.body.gender;
+                        }
+                        if (req.body.username !== '') {
+                            user.username = req.body.username;
+                        }
+                        if (req.body.age !== '') {
+                            user.age = req.body.age;
+                        }
+                        if (req.body.password !== '') {
+                            user.encryptPass(req.body.password)
+                            user.password = crypto.createHash('md5').update(req.body.password, 10).digest('hex');
+                        }
+                        saveUser(user,res)
                     }
-
                 })
-            }
-        })
-
+        }
+    })
 };
 
+/**
+ * DELETE PROFILE
+ */
+
 module.exports.delete = function (req, res) {
-    User.findOneAndDelete({_id: req.body._id},function (err,result) {
-        if (err) return res.send(err);
-        res.json({ message: 'Deleted' });
-        console.log('delete', result);
-    });
+    User.findOne({login: req.auth.login}, function(err, user) {
+        if (err) {
+            console.log(err);
+            return res.sendStatus(500)
+        }
+        if (!user) {
+            return res.sendStatus(404)
+        }
+        else {
+            User.findOneAndDelete({_id: req.body._id}, function (err, result) {
+                if (err) return res.send(err);
+                res.json({message: 'Deleted'});
+                console.log('delete', result);
+            });
+        }
+    })
 };
 
